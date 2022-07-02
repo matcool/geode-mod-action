@@ -1,0 +1,15 @@
+{
+	"geode":        "v0.1.0",
+	"version":      "v1.0.0",
+	"id":           "com.you.template",
+	"name":         "Template",
+	"developer":    "You",
+	"description":  "template mod",
+	"binary":       "Template",
+	"dependencies": [
+		{
+			"id": "com.geode.api",
+			"required": true
+		}
+	]
+}
