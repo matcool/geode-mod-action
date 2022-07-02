@@ -22,13 +22,13 @@ jobs:
           cli_name: "geode.exe"
           os: windows-2019
           extra_flags: '-G "Visual Studio 16 2019" -T host=x86 -A win32'
-          out_paths:  './build/Release/${{ env.MOD_NAME }}.geode'
+          out_paths:  './build/Release/Template.geode'
         - name: "macOS"
           bin_folder: "macos"
           cli_name: "geode"
           os: macos-latest
           extra_flags: ""
-          out_paths: './build/${{ env.MOD_NAME }}.dylib'
+          out_paths: './build/Template.dylib'
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
 
