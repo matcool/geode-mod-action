@@ -22,7 +22,7 @@ jobs:
           cli_name: "geode.exe"
           os: windows-2019
           extra_flags: '-G "Visual Studio 16 2019" -T host=x86 -A win32'
-          out_paths:  './build/Release/$MOD_NAME.geode
+          out_paths:  './build/Release/$MOD_NAME.geode'
         - name: "macOS"
           bin_folder: "macos"
           cli_name: "geode"
