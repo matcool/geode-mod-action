@@ -75,6 +75,7 @@ jobs:
     name: "Package both builds"
     # would use linux but theres no cli build for it
     runs-on: windows-2019
+    needs: ['build']
     
     steps:
       - uses: actions/checkout@v2
