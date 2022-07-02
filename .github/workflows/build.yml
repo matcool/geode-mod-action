@@ -1,0 +1,109 @@
+name: Build Geode Mod
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+      
+      
+env:
+  GEODE_SUITE: ${{ github.workspace }}/suite
+  MOD_NAME: Template
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - name: "Windows"
+          bin_folder: "windows"
+          cli_name: "geode.exe"
+          os: windows-2019
+          extra_flags: '-G "Visual Studio 16 2019" -T host=x86 -A win32'
+          out_paths:  './build/Release/$MOD_NAME.geode
+        - name: "macOS"
+          bin_folder: "macos"
+          cli_name: "geode"
+          os: macos-latest
+          extra_flags: ""
+          out_paths: './build/$MOD_NAME.dylib'
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        repository: geode-sdk/suite
+        ref: nightly
+        path: ${{ env.GEODE_SUITE }}
+
+    - name: Setup CLI
+      shell: bash
+      run: |
+        ls $GEODE_SUITE
+        echo $GEODE_SUITE/${{ matrix.config.bin_folder }} >> $GITHUB_PATH
+        chmod +x $GEODE_SUITE/${{ matrix.config.bin_folder }}/${{ matrix.config.cli_name }}
+     
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
+      if: matrix.config.os == 'windows-latest'
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build ${{ matrix.config.extra_flags }} -DGEODE_DONT_AUTO_INSTALL=On
+    
+    - name: Build
+      run: |
+        cd ${{ github.workspace }}/build
+        cmake --build . --config Release
+    
+    - uses: actions/upload-artifact@v3
+      with:
+        name: "build-${{ matrix.config.bin_folder }}"
+        path: "${{ matrix.config.out_paths }}"
+        
+        
+  package:
+    name: "Package both builds"
+    # would use linux but theres no cli build for it
+    runs-on: windows-2019
+    
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+          repository: geode-sdk/suite
+          ref: nightly
+          path: ${{ env.GEODE_SUITE }}
+          
+      - name: Setup CLI
+        shell: bash
+        run: |
+          echo $GEODE_SUITE/${{ matrix.config.bin_folder }} >> $GITHUB_PATH
+          
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-windows
+          
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-macos
+          
+      - name: Merge
+        shell: bash
+        run: |
+          $GEODE_SUITE/windows/geode.exe amend $MOD_NAME.geode $MOD_NAME.dylib .
+         
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Build Output
+          path: "$MOD_NAME.geode"
+          
