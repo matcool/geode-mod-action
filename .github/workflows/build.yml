@@ -114,6 +114,8 @@ jobs:
       - name: Merge
         shell: bash
         run: |
+          tar -xf build-macos.zip
+          tar -xf build-windows.zip
           mv $MOD_NAME.dll $MOD_ID.dll
           mv lib$MOD_NAME.dylib $MOD_ID.dylib
           geode.exe package new . --binary $MOD_NAME.dll --binary $MOD_NAME.dylib --output $MOD_NAME.geode
