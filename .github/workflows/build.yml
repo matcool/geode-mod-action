@@ -19,7 +19,6 @@ jobs:
         config:
         - name: "Windows"
           bin_folder: "windows"
-          cli_name: "geode.exe"
           os: windows-2019
           extra_flags: '-G "Visual Studio 16 2019" -T host=x64 -A win32'
           out_paths:  './build/Release/*.dll'
@@ -27,7 +26,6 @@ jobs:
           
         - name: "macOS"
           bin_folder: "macos"
-          cli_name: "geode"
           os: macos-latest
           extra_flags: ""
           out_paths: './build/*.dylib'
@@ -116,3 +114,12 @@ jobs:
           name: Build Output
           path: "${{ env.MOD_NAME }}.geode"
           
+      - uses: geekyeggo/delete-artifact@v2
+        with:
+            name: build-windows
+            failOnError: false
+          
+      - uses: geekyeggo/delete-artifact@v2
+        with:
+            name: build-macos
+            failOnError: false
