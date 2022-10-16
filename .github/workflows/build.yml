@@ -48,10 +48,17 @@ jobs:
       with:
         arch: x86
       if: matrix.config.os == 'windows-2019'
+      
+    - name: Build Geode SDK
+      run: |
+        cd ${{ GEODE_SDK }}
+        cmake -B build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1 -DGEODE_DONT_BUILD_TEST_MODS=1
+        cmake --build build --config Release
 
     - name: Configure CMake
       run: |
-        cmake -B ${{ github.workspace }}/build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1
+        cd ${{ github.workspace }}
+        cmake -B build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1
     
     - name: Build
       run: |
