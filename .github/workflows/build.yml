@@ -92,18 +92,11 @@ jobs:
     runs-on: windows-2019
     needs: ['build']
     
-    steps:
-      - uses: robinraju/release-downloader@v1.5
-        with:
-          repository: geode-sdk/cli
-          tag: v1.0.7
-          fileName: "geode-cli-v1.0.7-win.zip"
-          tarBall: false
-          zipBall: false
-          
-      - name: Unzip CLI
-        shell: powershell
-        run: Expand-Archive -Force geode-cli-v1.0.7.zip .
+    steps:          
+      - name: Download and Unzip CLI
+        run: |
+          curl -L https://github.com/geode-sdk/cli/releases/download/v1.0.7/geode-cli-v1.0.7-win.zip -o geode-cli.zip
+          tar -xf geode-cli.zip
 
       - uses: actions/download-artifact@v3
         with:
