@@ -96,14 +96,14 @@ jobs:
       - uses: robinraju/release-downloader@v1.5
         with:
           repository: geode-sdk/cli
-          tag: v0.4.7
-          fileName: "geode-cli-v0.4.7-win.zip"
+          tag: v1.0.7
+          fileName: "geode-cli-v1.0.7-win.zip"
           tarBall: false
           zipBall: false
           
       - name: Unzip CLI
         shell: powershell
-        run: Expand-Archive -Force geode-cli-v0.4.7.zip .
+        run: Expand-Archive -Force geode-cli-v1.0.7.zip .
 
       - uses: actions/download-artifact@v3
         with:
