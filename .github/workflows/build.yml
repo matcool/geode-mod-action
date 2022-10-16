@@ -96,7 +96,7 @@ jobs:
       - uses: robinraju/release-downloader@v1.5
         with:
           repository: geode-sdk/cli
-          tag: v4.0.7
+          tag: v0.4.7
           fileName: "geode-cli-v0.4.7-win.zip"
           tarBall: false
           zipBall: false
