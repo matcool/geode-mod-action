@@ -42,6 +42,7 @@ jobs:
       with:
         submodules: recursive
         repository: geode-sdk/geode
+        ref: v0.4.8
         path: ${{ env.GEODE_SDK }}
      
     - uses: ilammy/msvc-dev-cmd@v1
@@ -52,8 +53,22 @@ jobs:
     - name: Build Geode SDK
       run: |
         cd ${{ github.workspace }}/sdk
-        cmake -B build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1 -DGEODE_DONT_BUILD_TEST_MODS=1
-        cmake --build build --config Release
+        mkdir bin
+        mkdir bin/nightly
+        cd bin/nightly
+        curl https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-win.zip -o geode-sdk.zip
+        tar -xf geode-sdk.zip
+      if: matrix.config.os == 'windows-2019'
+      
+    - name: Build Geode SDK
+      run: |
+        cd ${{ github.workspace }}/sdk
+        mkdir bin
+        mkdir bin/nightly
+        cd bin/nightly
+        curl https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-mac.zip -o geode-sdk.zip
+        tar -xf geode-sdk.zip
+      if: matrix.config.os == 'macos-latest'
 
     - name: Configure CMake
       run: |
