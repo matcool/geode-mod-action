@@ -5,11 +5,10 @@ on:
   push:
     branches:
       - "main"
-      
-      
+
 env:
-  GEODE_SUITE: ${{ github.workspace }}/suite
-  MOD_NAME: Template
+  GEODE_SDK: ${{ github.workspace }}/sdk
+  MOD_NAME: geode-mod-action
 
 jobs:
   build:
@@ -21,44 +20,38 @@ jobs:
           bin_folder: "windows"
           cli_name: "geode.exe"
           os: windows-2019
-          extra_flags: '-G "Visual Studio 16 2019" -T host=x86 -A win32'
-          out_paths:  './build/Release/Template.geode'
+          extra_flags: '-G "Visual Studio 16 2019" -T host=x64 -A win32'
+          out_paths:  './build/Release/geode-mod-action.dll'
+          
         - name: "macOS"
           bin_folder: "macos"
           cli_name: "geode"
           os: macos-latest
           extra_flags: ""
-          out_paths: './build/Template.dylib'
+          out_paths: './build/geode-mod-action.dylib'
+          
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
-        repository: geode-sdk/suite
-        ref: nightly
-        path: ${{ env.GEODE_SUITE }}
-
-    - name: Setup CLI
-      shell: bash
-      run: |
-        ls $GEODE_SUITE
-        echo $GEODE_SUITE/${{ matrix.config.bin_folder }} >> $GITHUB_PATH
-        chmod +x $GEODE_SUITE/${{ matrix.config.bin_folder }}/${{ matrix.config.cli_name }}
+        repository: geode-sdk/geode
+        path: ${{ env.GEODE_SDK }}
      
     - uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x86
-      if: matrix.config.os == 'windows-latest'
+      if: matrix.config.os == 'windows-2019'
 
     - name: Configure CMake
       run: |
-        cmake -B ${{ github.workspace }}/build ${{ matrix.config.extra_flags }} -DGEODE_DONT_AUTO_INSTALL=On
+        cmake -B ${{ github.workspace }}/build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1
     
     - name: Build
       run: |
@@ -78,18 +71,18 @@ jobs:
     needs: ['build']
     
     steps:
-      - uses: actions/checkout@v2
+      - uses: robinraju/release-downloader@v1.5
         with:
-          submodules: recursive
-          repository: geode-sdk/suite
-          ref: nightly
-          path: ${{ env.GEODE_SUITE }}
+          repository: geode-sdk/cli
+          tag: v4.0.7
+          fileName: "geode-cli-v0.4.7-win.zip"
+          tarBall: false
+          zipBall: false
           
-      - name: Setup CLI
-        shell: bash
-        run: |
-          echo $GEODE_SUITE/${{ matrix.config.bin_folder }} >> $GITHUB_PATH
-          
+      - name: Unzip CLI
+        shell: powershell
+        run: Expand-Archive -Force geode-cli-v0.4.7.zip .
+
       - uses: actions/download-artifact@v3
         with:
           name: build-windows
@@ -97,11 +90,14 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: build-macos
+      
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
           
       - name: Merge
         shell: bash
-        run: |
-          $GEODE_SUITE/windows/geode.exe amend $MOD_NAME.geode $MOD_NAME.dylib .
+        run: geode.exe package new . --binary $MOD_NAME.dll --binary $MOD_NAME.dylib --output $MOD_NAME.geode
          
       - uses: actions/upload-artifact@v3
         with:
