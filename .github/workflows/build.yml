@@ -22,14 +22,16 @@ jobs:
           cli_name: "geode.exe"
           os: windows-2019
           extra_flags: '-G "Visual Studio 16 2019" -T host=x64 -A win32'
-          out_paths:  './build/Release/geode-mod-action.dll'
+          out_paths:  './build/Release/${{ env.MOD_NAME }}.dll'
+          platform_suffix: 'win'
           
         - name: "macOS"
           bin_folder: "macos"
           cli_name: "geode"
           os: macos-latest
           extra_flags: ""
-          out_paths: './build/libgeode-mod-action.dylib'
+          out_paths: './build/lib${{ env.MOD_NAME }}.dylib'
+          platform_suffix: 'mac'
           
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -51,25 +53,14 @@ jobs:
         arch: x86
       if: matrix.config.os == 'windows-2019'
       
-    - name: Build Geode SDK
+    - name: Download Geode SDK binaries
       run: |
         cd ${{ github.workspace }}/sdk
         mkdir bin
         mkdir bin/nightly
         cd bin/nightly
-        curl -L https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-win.zip -o geode-sdk.zip
+        curl -L https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-${{ matrix.config.platform_suffix }}.zip -o geode-sdk.zip
         tar -xf geode-sdk.zip
-      if: matrix.config.os == 'windows-2019'
-      
-    - name: Build Geode SDK
-      run: |
-        cd ${{ github.workspace }}/sdk
-        mkdir bin
-        mkdir bin/nightly
-        cd bin/nightly
-        curl -L https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-mac.zip -o geode-sdk.zip
-        tar -xf geode-sdk.zip
-      if: matrix.config.os == 'macos-latest'
 
     - name: Configure CMake
       run: |
