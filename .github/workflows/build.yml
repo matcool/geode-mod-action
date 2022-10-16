@@ -56,7 +56,7 @@ jobs:
         mkdir bin
         mkdir bin/nightly
         cd bin/nightly
-        curl https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-win.zip -o geode-sdk.zip
+        curl -L https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-win.zip -o geode-sdk.zip
         tar -xf geode-sdk.zip
       if: matrix.config.os == 'windows-2019'
       
@@ -66,7 +66,7 @@ jobs:
         mkdir bin
         mkdir bin/nightly
         cd bin/nightly
-        curl https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-mac.zip -o geode-sdk.zip
+        curl -L https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-mac.zip -o geode-sdk.zip
         tar -xf geode-sdk.zip
       if: matrix.config.os == 'macos-latest'
 
