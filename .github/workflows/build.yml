@@ -119,7 +119,7 @@ jobs:
         run: |
           mv $MOD_NAME.dll $MOD_ID.dll
           mv lib$MOD_NAME.dylib $MOD_ID.dylib
-          geode.exe package new . --binary $MOD_NAME.dll --binary $MOD_NAME.dylib --output $MOD_NAME.geode
+          ./geode.exe package new . --binary $MOD_NAME.dll --binary $MOD_NAME.dylib --output $MOD_NAME.geode
          
       - uses: actions/upload-artifact@v3
         with:
