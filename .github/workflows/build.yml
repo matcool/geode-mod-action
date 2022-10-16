@@ -51,7 +51,7 @@ jobs:
       
     - name: Build Geode SDK
       run: |
-        cd ${{ GEODE_SDK }}
+        cd ${{ github.workspace }}/sdk
         cmake -B build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1 -DGEODE_DONT_BUILD_TEST_MODS=1
         cmake --build build --config Release
 
