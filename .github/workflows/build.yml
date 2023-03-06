@@ -8,6 +8,9 @@ on:
 
 env:
   GEODE_SDK: ${{ github.workspace }}/sdk
+  GEODE_VERSION: v1.0.0-beta.8
+  CLI_VERSION: v1.4.1
+
   MOD_NAME: geode-mod-action
   MOD_ID: mat.geode-mod-action
 
@@ -17,19 +20,17 @@ jobs:
       fail-fast: false
       matrix:
         config:
-        - name: "Windows"
-          bin_folder: "windows"
+        - name: Windows
           os: windows-2019
-          extra_flags: '-G "Visual Studio 16 2019" -T host=x64 -A win32'
-          out_paths:  './build/Release/*.dll'
-          platform_suffix: 'win'
+          extra_flags: -A win32
+          out_paths: ./build/Release/*.dll
+          platform_suffix: win
           
-        - name: "macOS"
-          bin_folder: "macos"
-          os: macos-latest
+        - name: macOS
+          os: macos-11
           extra_flags: ""
-          out_paths: './build/*.dylib'
-          platform_suffix: 'mac'
+          out_paths: ./build/*.dylib
+          platform_suffix: mac
           
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -43,7 +44,7 @@ jobs:
       with:
         submodules: recursive
         repository: geode-sdk/geode
-        # ref: v0.4.8
+        ref: ${{ env.GEODE_VERSION }}
         path: ${{ env.GEODE_SDK }}
      
     - uses: ilammy/msvc-dev-cmd@v1
@@ -56,13 +57,13 @@ jobs:
         mkdir bin
         mkdir bin/nightly
         cd bin/nightly
-        curl -L https://github.com/geode-sdk/geode/releases/download/v0.4.8/geode-v0.4.8-${{ matrix.config.platform_suffix }}.zip -o geode-sdk.zip
+        curl -L https://github.com/geode-sdk/geode/releases/download/${{ env.GEODE_VERSION }}/geode-${{ env.GEODE_VERSION }}-${{ matrix.config.platform_suffix }}.zip -o geode-sdk.zip
         tar -xf geode-sdk.zip
 
     - name: Configure CMake
       run: |
         cd ${{ github.workspace }}
-        cmake -B build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1
+        cmake -B build ${{ matrix.config.extra_flags }} -DGEODE_DISABLE_CLI_CALLS=1 -DCMAKE_BUILD_TYPE=Release
     
     - name: Build
       run: |
@@ -71,8 +72,8 @@ jobs:
     
     - uses: actions/upload-artifact@v3
       with:
-        name: "build-${{ matrix.config.bin_folder }}"
-        path: "${{ matrix.config.out_paths }}"
+        name: build-${{ matrix.config.platform_suffix }}
+        path: ${{ matrix.config.out_paths }}
         
         
   package:
@@ -88,38 +89,35 @@ jobs:
       
       - name: Download and Unzip CLI
         run: |
-          curl -L https://github.com/geode-sdk/cli/releases/download/v1.0.7/geode-cli-v1.0.7-win.zip -o geode-cli.zip
+          curl -L https://github.com/geode-sdk/cli/releases/download/${{ env.CLI_VERSION }}/geode-cli-${{ env.CLI_VERSION }}-win.zip -o geode-cli.zip
           tar -xf geode-cli.zip
 
       - uses: actions/download-artifact@v3
         with:
-          name: build-windows
+          name: build-win
           
       - uses: actions/download-artifact@v3
         with:
-          name: build-macos
-          
-      - name: Display structure of downloaded files
-        run: ls -R
+          name: build-mac
       
       - name: Merge
         shell: bash
         run: |
           mv $MOD_NAME.dll $MOD_ID.dll
           mv lib$MOD_NAME.dylib $MOD_ID.dylib
-          ./geode.exe package new . --binary $MOD_ID.dll --binary $MOD_ID.dylib --output $MOD_NAME.geode
+          ./geode.exe package new . --binary $MOD_ID.dll --binary $MOD_ID.dylib --output $MOD_ID.geode
          
       - uses: actions/upload-artifact@v3
         with:
           name: Build Output
-          path: "${{ env.MOD_NAME }}.geode"
+          path: "${{ env.MOD_ID }}.geode"
           
       - uses: geekyeggo/delete-artifact@v2
         with:
-            name: build-windows
+            name: build-win
             failOnError: false
           
       - uses: geekyeggo/delete-artifact@v2
         with:
-            name: build-macos
+            name: build-mac
             failOnError: false
